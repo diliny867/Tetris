@@ -48,6 +48,9 @@
     <ClCompile Include="include\GL\Texture2D.cpp">
       <Filter>Source Files\GL</Filter>
     </ClCompile>
+    <ClCompile Include="include\GL\Mesh2D.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\shader_fs.glsl">
@@ -81,6 +84,12 @@
     </ClInclude>
     <ClInclude Include="include\Tetris.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TetrisRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GL\Mesh2D.h">
+      <Filter>Header Files\GL</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

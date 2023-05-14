@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="G:\Prog\Other\Cpp\External Libraries\OpenGL\glad.c" />
     <ClCompile Include="include\GL\EBO.cpp" />
+    <ClCompile Include="include\GL\Mesh2D.cpp" />
     <ClCompile Include="include\GL\Shader.cpp" />
     <ClCompile Include="include\GL\stb_image.cpp" />
     <ClCompile Include="include\GL\Texture2D.cpp" />
@@ -34,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\GL\EBO.h" />
+    <ClInclude Include="include\GL\Mesh2D.h" />
     <ClInclude Include="include\GL\Shader.h" />
     <ClInclude Include="include\GL\stb_image.h" />
     <ClInclude Include="include\GL\Texture2D.h" />
@@ -41,6 +43,7 @@
     <ClInclude Include="include\GL\VAO.h" />
     <ClInclude Include="include\GL\VBO.h" />
     <ClInclude Include="include\Tetris.h" />
+    <ClInclude Include="include\TetrisRenderer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

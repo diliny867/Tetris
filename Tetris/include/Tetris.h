@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 
 #include <iostream>
-#include <algorithm>
 
 #include "../include/GL/Time.h"
 
@@ -59,15 +58,15 @@ private:
 														{{2,0},{2,1},{1,1},{1,2}}},
 												{{{0,1},{1,1},{2,1},{1,2}},
 														{{1,0},{1,1},{1,2},{0,1}},
-														{{1,0},{1,1},{1,2},{2,1}},
-														{{1,0},{1,1},{1,2},{0,1}}}};
+														{{0,1},{1,1},{2,1},{1,0}},
+														{{1,0},{1,1},{1,2},{2,1}}}};
 	int last_spawned_piece = EMPTY_BLOCK;
 	int rot_state = 0;
 	glm::ivec2 curr_block_move_delta = {0,0};
 	int field[FIELD_WIDTH][FIELD_HEIGHT+1];
 	glm::ivec2* curr_block_pos = new glm::ivec2[4]; //0 0 is top left
-	double tick_timeout = 0.1f; //in seconds
-	double lastTickTime = 0;
+	double tick_timeout = 0.2f; //in seconds
+	double last_tick_time = 0;
 	bool game_over = false;
 	void clearCurrBlock() {
 		for(int i=0;i<4;i++) {
@@ -86,7 +85,7 @@ private:
 		while(last_spawned_piece == piece) {
 			piece = 1+rand()%7;
 		}
-		piece =3;
+		piece=1;
 		curr_block_pos = BLOCK_SPAWN_STATES[piece-1];
 		last_spawned_piece = piece;
 
@@ -175,27 +174,25 @@ private:
 	void speedUpBlockSpawn() {
 
 	}
-	char draw_symbol = '#';
 	void tick() {
 		if(checkBlockBottomIntersection(curr_block_pos)) {
 			int highest = highestCurrentBlock(); //0 is the highest
 			int lowest = lowestCurrentBlock();
-			int rows_to_delete = 0;
+			int removed_rows_count = 0;
 			for(int i=0;i<lowest-highest+1;i++) {
 				bool row_complete = true;
 				for(int j=0;j<FIELD_WIDTH;j++) {
-					if(field[j][highest+i] == EMPTY_BLOCK) {
+					if(field[j][lowest-i+removed_rows_count] == EMPTY_BLOCK) {
 						row_complete = false;
 						break;
 					}
 				}
 				if(row_complete) {
-					rows_to_delete++;
+					removeRow(lowest-i+removed_rows_count);
+					removed_rows_count++;
 				}
 			}
-			for(int i=0;i<rows_to_delete;i++) {
-				removeRow(highest+1);
-			}
+			dc=lowest-highest+1;
 
 			spawnPiece();
 		}else{
@@ -226,7 +223,7 @@ public:
 		}
 		fillCurrBlock();
 	}
-	void RotateCurrBlock(const bool left) { //TODO: TOP WALL COLLISION
+	void RotateCurrBlock(const bool left) {
 		clearCurrBlock();
 		int last_rot_state = rot_state;
 		if(left) {
@@ -268,9 +265,9 @@ public:
 		if(game_over) {
 			return;
 		}
-		if(Time::time-lastTickTime>=tick_timeout){
+		if(Time::time-last_tick_time>=tick_timeout){
 			tick();
-			lastTickTime = Time::time;
+			last_tick_time = Time::time;
 		}
 		for(int i=0;i<FIELD_HEIGHT+1;i++) {
 			for(int j=0;j<FIELD_WIDTH;j++) {
@@ -278,7 +275,7 @@ public:
 					std::cout<<' ';
 				}
 				else {
-					std::cout<<draw_symbol;
+					std::cout<<'#';
 				}
 			}
 			std::cout<<std::endl;

@@ -13,6 +13,7 @@
 #include "../include/GL/VAO.h"
 #include "../include/GL/Shader.h"
 #include "../include/Tetris.h"
+#include "../include/TetrisRenderer.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -99,9 +100,11 @@ int main() {
 	    projection = glm::ortho(0.0f,SCR_WIDTH,SCR_HEIGHT,0.0f);
     };
 
+    TetrisRenderer tr;
+
     while (!glfwWindowShouldClose(window)) {
         Time::Update();
-        processInput(window);// input
+        //processInput(window);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);

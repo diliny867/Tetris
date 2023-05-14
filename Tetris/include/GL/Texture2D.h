@@ -17,6 +17,7 @@ public:
 	GLuint id{};
 	TextureType type;
 	std::string path;
+	Texture2D(){};
 	Texture2D(int width, int height);
 	Texture2D(int width, int height, GLint internalformat, GLenum format, GLenum dataType);
 	Texture2D(int width, int height, GLint internalformat, GLenum format, GLenum dataType, const void* data);
