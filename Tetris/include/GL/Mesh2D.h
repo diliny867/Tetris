@@ -15,8 +15,8 @@
 #include "EBO.h"
 
 struct Vertex2D{
-	Vertex2D(const glm::vec2 position_,const glm::vec2 texCoords_):position(position_),texCoords(texCoords_){};
-	glm::vec2 position;
+	Vertex2D(const glm::vec3 position_,const glm::vec2 texCoords_):position(position_),texCoords(texCoords_){};
+	glm::vec3 position;
 	glm::vec2 texCoords;
 };
 

@@ -19,7 +19,7 @@ void Mesh2D::setupMesh() {
 	EBO::bind(ebo);
 	EBO::setData(ebo, indices.size() * sizeof(unsigned int), (indices).data(), GL_STATIC_DRAW);
 	
-	VAO::addAttrib(vao, 0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)0);
+	VAO::addAttrib(vao, 0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)0);
 	VAO::addAttrib(vao, 2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(Vertex2D, texCoords));
 }
 

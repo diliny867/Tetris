@@ -85,7 +85,6 @@ private:
 		while(last_spawned_piece == piece) {
 			piece = 1+rand()%7;
 		}
-		piece=1;
 		curr_block_pos = BLOCK_SPAWN_STATES[piece-1];
 		last_spawned_piece = piece;
 
@@ -192,7 +191,6 @@ private:
 					removed_rows_count++;
 				}
 			}
-			dc=lowest-highest+1;
 
 			spawnPiece();
 		}else{
@@ -269,17 +267,8 @@ public:
 			tick();
 			last_tick_time = Time::time;
 		}
-		for(int i=0;i<FIELD_HEIGHT+1;i++) {
-			for(int j=0;j<FIELD_WIDTH;j++) {
-				if(field[j][i]==EMPTY_BLOCK) {
-					std::cout<<' ';
-				}
-				else {
-					std::cout<<'#';
-				}
-			}
-			std::cout<<std::endl;
-		}
-		std::system("cls");
+	}
+	int GetBlock(const int x,const int y) const {
+		return field[x][y];
 	}
 };

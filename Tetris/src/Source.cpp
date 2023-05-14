@@ -39,7 +39,7 @@ public:
 };
 Mouse mouse(SCR_WIDTH/2.0f,SCR_HEIGHT/2.0f);
 
-Tetris tetrisGame;
+TetrisRenderer tr;
 
 int main() {
     glfwInit();
@@ -96,11 +96,17 @@ int main() {
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view = glm::mat4(1.0f);
 
+    shader.use();
+    shader.setMat4("projection",projection);
+    shader.setMat4("model",model);
+
     shader_viewpoint_callback = [&]() {
 	    projection = glm::ortho(0.0f,SCR_WIDTH,SCR_HEIGHT,0.0f);
+        shader.use();
+        shader.setMat4("projection",projection);
     };
 
-    TetrisRenderer tr;
+    tr.Init();
 
     while (!glfwWindowShouldClose(window)) {
         Time::Update();
@@ -109,12 +115,11 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        tetrisGame.Update();
+        tr.tetris.Update();
 
-        shader.use();
-        shader.setMat4("projection",projection);
-        shader.setMat4("model",model);
+        tr.Draw(shader);
 
+        glfwSetWindowTitle(window,(std::string("FPS: ")+std::to_string(1/Time::deltaTime)).c_str());
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -141,16 +146,16 @@ void key_callback(GLFWwindow* window,int key,int scancode,int action,int mods) {
         glfwSetWindowShouldClose(window,true);
     }
     if((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_PRESS) {
-        tetrisGame.MoveCurrBlock(true);
+        tr.tetris.MoveCurrBlock(true);
     }
     if((key == GLFW_KEY_RIGHT || key == GLFW_KEY_D) && action == GLFW_PRESS) {
-        tetrisGame.MoveCurrBlock(false);
+        tr.tetris.MoveCurrBlock(false);
     }
     if(key == GLFW_KEY_Q && action == GLFW_PRESS) {
-        tetrisGame.RotateCurrBlock(true);
+        tr.tetris.RotateCurrBlock(true);
     }
     if(key == GLFW_KEY_E && action == GLFW_PRESS) {
-        tetrisGame.RotateCurrBlock(false);
+        tr.tetris.RotateCurrBlock(false);
     }
 }
 
@@ -193,5 +198,6 @@ void framebuffer_size_callback(GLFWwindow* window,int width,int height) {
     SCR_WIDTH = width;
     SCR_HEIGHT = height;
     glViewport(0,0,width,height); //0,0 - left bottom
+    tr.UpdateResolution(SCR_WIDTH,SCR_HEIGHT);
     shader_viewpoint_callback();
 }
