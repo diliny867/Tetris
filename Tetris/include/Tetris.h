@@ -19,11 +19,12 @@
 #define Z_BLOCK 6
 #define T_BLOCK 7
 #define FLOOR_BLOCK 8
-#define LEFT_WALL_INTERSECTION 9
-#define RIGHT_WALL_INTERSECTION 10
+#define CEILING_BLOCK 9
+#define LEFT_WALL_BLOCK 10
+#define RIGHT_WALL_BLOCK 11
 
 class Tetris {
-public:
+private:
 	// :skull_emoji:
 	inline static glm::ivec2 BLOCK_SPAWN_STATES[7][4] ={{{0,0},{1,0},{2,0},{3,0}},
 										{{0,0},{1,0},{0,1},{1,1}},
@@ -67,116 +68,87 @@ public:
 	glm::ivec2* curr_block_pos = new glm::ivec2[4]; //0 0 is top left
 	double tick_timeout = 0.1f; //in seconds
 	double lastTickTime = 0;
+	bool game_over = false;
+	void clearCurrBlock() {
+		for(int i=0;i<4;i++) {
+			field[curr_block_pos[i].x+curr_block_move_delta.x][curr_block_pos[i].y+curr_block_move_delta.y] = EMPTY_BLOCK;
+		}
+	}
+	void fillCurrBlock() {
+		for(int i=0;i<4;i++) {
+			field[curr_block_pos[i].x+curr_block_move_delta.x][curr_block_pos[i].y+curr_block_move_delta.y] = last_spawned_piece;
+		}
+	}
 	void spawnPiece() {
-		curr_block_move_delta ={4,0};
+		curr_block_move_delta ={3,0};
 		static int piece = EMPTY_BLOCK;
+		rot_state = 0;
 		while(last_spawned_piece == piece) {
 			piece = 1+rand()%7;
 		}
+		piece =3;
 		curr_block_pos = BLOCK_SPAWN_STATES[piece-1];
-
-		//switch(piece) {
-		//case I_BLOCK:
-		//	curr_block_pos = I_BLOCK_ROT::spawn_state;
-		//	//curr_block_pos[0] ={3,0};
-		//	//curr_block_pos[1] ={4,0};
-		//	//curr_block_pos[2] ={5,0};
-		//	//curr_block_pos[3] ={6,0};
-		//	break;
-		//case O_BLOCK:
-		//	curr_block_pos = O_BLOCK_ROT::spawn_state;
-		//	//curr_block_pos[0] ={4,0};
-		//	//curr_block_pos[1] ={5,0};
-		//	//curr_block_pos[2] ={4,1};
-		//	//curr_block_pos[3] ={5,1};
-		//	break;
-		//case L_BLOCK:
-		//	curr_block_pos = L_BLOCK_ROT::spawn_state;
-		//	//curr_block_pos[0] ={4,0};
-		//	//curr_block_pos[1] ={5,0};
-		//	//curr_block_pos[2] ={6,0};
-		//	//curr_block_pos[3] ={4,1};
-		//	break;
-		//case J_BLOCK:
-		//	curr_block_pos = J_BLOCK_ROT::spawn_state;
-		//	//curr_block_pos[0] ={4,0};
-		//	//curr_block_pos[1] ={5,0};
-		//	//curr_block_pos[2] ={6,0};
-		//	//curr_block_pos[3] ={6,1};
-		//	break;
-		//case S_BLOCK:
-		//	curr_block_pos = S_BLOCK_ROT::spawn_state;
-		//	//curr_block_pos[0] ={4,1};
-		//	//curr_block_pos[1] ={5,1};
-		//	//curr_block_pos[2] ={5,0};
-		//	//curr_block_pos[3] ={6,0};
-		//	break;
-		//case Z_BLOCK:
-		//	curr_block_pos = Z_BLOCK_ROT::spawn_state;
-		//	//curr_block_pos[0] ={4,0};
-		//	//curr_block_pos[1] ={5,0};
-		//	//curr_block_pos[2] ={5,1};
-		//	//curr_block_pos[3] ={6,1};
-		//	break;
-		//case T_BLOCK:
-		//	curr_block_pos = T_BLOCK_ROT::spawn_state;
-		//	//curr_block_pos[0] ={4,0};
-		//	//curr_block_pos[1] ={5,0};
-		//	//curr_block_pos[2] ={6,0};
-		//	//curr_block_pos[3] ={5,1};
-		//	break;
-		//}
-		for(int i=0;i<4;i++) {
-			field[curr_block_pos[i].x+curr_block_move_delta.x][curr_block_pos[i].y+curr_block_move_delta.y] = piece;
-		}
 		last_spawned_piece = piece;
+
+		if(checkBlockIntersects(curr_block_pos)!=EMPTY_BLOCK) {
+			game_over = true;
+		}
+
+		fillCurrBlock();
 	}
 	int lowestCurrentBlock() const {
-		int lowest = curr_block_pos[0].y;
-		int index = 0;
+		int lowest = curr_block_pos[0].y+curr_block_move_delta.y;
 		for(int i=1;i<4;i++) {
-			if(curr_block_pos[i].y > lowest) {
-				lowest = curr_block_pos[i].y;
-				index = i;
+			if(curr_block_pos[i].y+curr_block_move_delta.y > lowest) {
+				lowest = curr_block_pos[i].y+curr_block_move_delta.y;
 			}
 		}
-		return index;
+		return lowest;
 	}
 	int highestCurrentBlock() const {
-		int lowest = curr_block_pos[0].y;
-		int index = 0;
+		int highest = curr_block_pos[0].y+curr_block_move_delta.y;
 		for(int i=1;i<4;i++) {
-			if(curr_block_pos[i].y < lowest) {
-				lowest = curr_block_pos[i].y;
-				index = i;
+			if(curr_block_pos[i].y+curr_block_move_delta.y < highest) {
+				highest = curr_block_pos[i].y+curr_block_move_delta.y;
 			}
 		}
-		return index;
+		return highest;
 	}
 	void removeRow(const int row) {
-		memcpy(field+(FIELD_WIDTH*row),field+(FIELD_WIDTH*row-1),FIELD_WIDTH*row);
-		memset(field,0,FIELD_WIDTH*row);
+		for(int i=row;i>0;i--) {
+			for(int j=0;j<FIELD_WIDTH;j++) {
+				field[j][i] = field[j][i-1];
+			}
+		}
+		for(int i=0;i<FIELD_WIDTH;i++) {
+			field[i][0]=EMPTY_BLOCK;
+		}
+		//memcpy(field+(FIELD_WIDTH*row),field+(FIELD_WIDTH*row-1),FIELD_WIDTH*row); //this removes column
+		//memset(field,EMPTY_BLOCK,FIELD_WIDTH*row);
 	}
 	int checkBlockIntersects(const glm::ivec2* block) const {
 		int intersection = EMPTY_BLOCK;
 		for(int i=0;i<4;i++) {
-			if(block[i].y+curr_block_move_delta.y>=FIELD_WIDTH) {
+			if(block[i].y+curr_block_move_delta.y>=FIELD_HEIGHT) {
 				return FLOOR_BLOCK;
+			}
+		}
+		for(int i=0;i<4;i++) {
+			if(block[i].y+curr_block_move_delta.y<0) {
+				return CEILING_BLOCK;
 			}
 		}
 		for(int i=0;i<4;i++) {
 			int posx = block[i].x+curr_block_move_delta.x;
 			int posy = block[i].y+curr_block_move_delta.y;
 			if(posx<0) {
-				return LEFT_WALL_INTERSECTION;
+				return LEFT_WALL_BLOCK;
 			}
 			if(posx>=FIELD_WIDTH) {
-				return RIGHT_WALL_INTERSECTION;
+				return RIGHT_WALL_BLOCK;
 			}
-			if(field[posy][posy]!=EMPTY_BLOCK) {
-				if(intersection!=last_spawned_piece){
-					intersection = field[posx][posy];
-				}
+			if(field[posx][posy]!=EMPTY_BLOCK) {
+				intersection = field[posx][posy];
 			}
 		}
 		return intersection;
@@ -197,78 +169,39 @@ public:
 		}
 		return false;
 	}
-	void rotateBlock(const bool left) { //TODO: TOP WALL COLLISION
-		glm::ivec2 last_block_pos[4];
-		memcpy(last_block_pos,curr_block_pos,4);
-		int last_rot_state = rot_state;
-		if(left) {
-			rot_state--;
-			if(rot_state<0){ rot_state+=4; }
-		}else {
-			rot_state++;
-			if(rot_state>=4){ rot_state-=4; }
-		}
-
-		glm::ivec2* new_block_poses = BLOCK_ROTATE_STATES[last_spawned_piece][rot_state];
-		glm::ivec2 last_block_move_delta = curr_block_move_delta;
-
-		while(true){
-			int intersection = checkBlockIntersects(new_block_poses);
-			switch(intersection) {
-			case EMPTY_BLOCK: //no intersection
-				memcpy(curr_block_pos,new_block_poses,4);
-				for(int i=0;i<4;i++) {
-					field[last_block_pos[i].x][last_block_pos[i].y] = EMPTY_BLOCK;
-				}
-				for(int i=0;i<4;i++) {
-					field[curr_block_pos[i].x][curr_block_pos[i].y] = last_spawned_piece;
-				}
-				return;
-			case LEFT_WALL_INTERSECTION:
-				curr_block_move_delta.x++;
-				break;
-			case RIGHT_WALL_INTERSECTION:
-				curr_block_move_delta.x--;
-				break;
-			default: //intersection with floor or with blocks, don't rotate
-				curr_block_move_delta = last_block_move_delta;
-				rot_state = last_rot_state;
-				return;
-			}
-		}
-	}
 	void speedUpBlock() {
 
 	}
 	void speedUpBlockSpawn() {
 
 	}
+	char draw_symbol = '#';
 	void tick() {
 		if(checkBlockBottomIntersection(curr_block_pos)) {
+			int highest = highestCurrentBlock(); //0 is the highest
 			int lowest = lowestCurrentBlock();
-			int highest = highestCurrentBlock();
-
-			for(int i=highest;i<highest-lowest;i++) {
+			int rows_to_delete = 0;
+			for(int i=0;i<lowest-highest+1;i++) {
 				bool row_complete = true;
 				for(int j=0;j<FIELD_WIDTH;j++) {
-					if(field[i][j] == EMPTY_BLOCK) {
+					if(field[j][highest+i] == EMPTY_BLOCK) {
 						row_complete = false;
 						break;
 					}
 				}
 				if(row_complete) {
-					removeRow(i);
+					rows_to_delete++;
 				}
 			}
+			for(int i=0;i<rows_to_delete;i++) {
+				removeRow(highest+1);
+			}
+
 			spawnPiece();
 		}else{
-			for(int i=0;i<4;i++) {
-				field[curr_block_pos[i].x+curr_block_move_delta.x][curr_block_pos[i].y+curr_block_move_delta.y] = EMPTY_BLOCK;
-			}
+			clearCurrBlock();
 			curr_block_move_delta.y++;
-			for(int i=0;i<4;i++) {
-				field[curr_block_pos[i].x+curr_block_move_delta.x][curr_block_pos[i].y+curr_block_move_delta.y] = last_spawned_piece;
-			}
+			fillCurrBlock();
 		}
 	}
 public:
@@ -280,10 +213,76 @@ public:
 		srand(time(0));
 		spawnPiece();
 	}
+	void MoveCurrBlock(const bool left) {
+		clearCurrBlock();
+		int last_block_move_deltax = curr_block_move_delta.x;
+		if(left) {
+			curr_block_move_delta.x--;
+		}else {
+			curr_block_move_delta.x++;
+		}
+		if(checkBlockIntersects(curr_block_pos)!=EMPTY_BLOCK) {
+			curr_block_move_delta.x=last_block_move_deltax;
+		}
+		fillCurrBlock();
+	}
+	void RotateCurrBlock(const bool left) { //TODO: TOP WALL COLLISION
+		clearCurrBlock();
+		int last_rot_state = rot_state;
+		if(left) {
+			rot_state--;
+			if(rot_state<0){ rot_state+=4; }
+		}else {
+			rot_state++;
+			if(rot_state>=4){ rot_state-=4; }
+		}
+
+		glm::ivec2* new_block_poses = BLOCK_ROTATE_STATES[last_spawned_piece-1][rot_state];
+		glm::ivec2 last_block_move_delta = curr_block_move_delta;
+
+		while(true){
+			int intersection = checkBlockIntersects(new_block_poses);
+			switch(intersection) {
+			case EMPTY_BLOCK: //no intersection
+				curr_block_pos = new_block_poses;
+				fillCurrBlock();
+				return;
+			case CEILING_BLOCK:
+				curr_block_move_delta.y++;
+				break;
+			case LEFT_WALL_BLOCK:
+				curr_block_move_delta.x++;
+				break;
+			case RIGHT_WALL_BLOCK:
+				curr_block_move_delta.x--;
+				break;
+			default: //intersection with floor or with blocks, don't rotate
+				curr_block_move_delta = last_block_move_delta;
+				rot_state = last_rot_state;
+				fillCurrBlock();
+				return;
+			}
+		}
+	}
 	void Update() {
+		if(game_over) {
+			return;
+		}
 		if(Time::time-lastTickTime>=tick_timeout){
 			tick();
 			lastTickTime = Time::time;
 		}
+		for(int i=0;i<FIELD_HEIGHT+1;i++) {
+			for(int j=0;j<FIELD_WIDTH;j++) {
+				if(field[j][i]==EMPTY_BLOCK) {
+					std::cout<<' ';
+				}
+				else {
+					std::cout<<draw_symbol;
+				}
+			}
+			std::cout<<std::endl;
+		}
+		std::system("cls");
 	}
 };

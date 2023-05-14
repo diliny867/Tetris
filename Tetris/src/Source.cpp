@@ -38,6 +38,7 @@ public:
 };
 Mouse mouse(SCR_WIDTH/2.0f,SCR_HEIGHT/2.0f);
 
+Tetris tetrisGame;
 
 int main() {
     glfwInit();
@@ -98,8 +99,6 @@ int main() {
 	    projection = glm::ortho(0.0f,SCR_WIDTH,SCR_HEIGHT,0.0f);
     };
 
-    Tetris tetrisGame;
-
     while (!glfwWindowShouldClose(window)) {
         Time::Update();
         processInput(window);// input
@@ -108,18 +107,6 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         tetrisGame.Update();
-
-        for(int i=0;i<FIELD_HEIGHT+1;i++) {
-	        for(int j=0;j<FIELD_WIDTH;j++) {
-                if(tetrisGame.field[j][i]==EMPTY_BLOCK) {
-                    std::cout<<' ';
-                }else {
-                    std::cout<<'#';
-                }
-	        }
-            std::cout<<std::endl;
-        }
-        std::system("cls");
 
         shader.use();
         shader.setMat4("projection",projection);
@@ -149,6 +136,18 @@ void processInput(GLFWwindow* window) {
 void key_callback(GLFWwindow* window,int key,int scancode,int action,int mods) {
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window,true);
+    }
+    if((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_PRESS) {
+        tetrisGame.MoveCurrBlock(true);
+    }
+    if((key == GLFW_KEY_RIGHT || key == GLFW_KEY_D) && action == GLFW_PRESS) {
+        tetrisGame.MoveCurrBlock(false);
+    }
+    if(key == GLFW_KEY_Q && action == GLFW_PRESS) {
+        tetrisGame.RotateCurrBlock(true);
+    }
+    if(key == GLFW_KEY_E && action == GLFW_PRESS) {
+        tetrisGame.RotateCurrBlock(false);
     }
 }
 
