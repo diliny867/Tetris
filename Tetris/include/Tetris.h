@@ -64,13 +64,12 @@ public:
 	int rot_state = 0;
 	glm::ivec2 curr_block_move_delta = {0,0};
 	int field[FIELD_WIDTH][FIELD_HEIGHT+1];
-	glm::ivec2* curr_block_pos; //0 0 is top left
+	glm::ivec2* curr_block_pos = new glm::ivec2[4]; //0 0 is top left
 	double tick_timeout = 0.1f; //in seconds
 	double lastTickTime = 0;
 	void spawnPiece() {
-		curr_block_move_delta ={3,0};
-		int piece = EMPTY_BLOCK;
-		last_spawned_piece = EMPTY_BLOCK;
+		curr_block_move_delta ={4,0};
+		static int piece = EMPTY_BLOCK;
 		while(last_spawned_piece == piece) {
 			piece = 1+rand()%7;
 		}
@@ -187,7 +186,7 @@ public:
 			if(field[block[i].x+curr_block_move_delta.x][block[i].y+curr_block_move_delta.y+1]!=EMPTY_BLOCK) {
 				bool self_intersect = false;
 				for(int j=0;j<4;j++) {
-					if(field[block[i].x+curr_block_move_delta.x][block[i].y+curr_block_move_delta.y+1] == field[block[j].x+curr_block_move_delta.x][block[j].y+curr_block_move_delta.y]) {
+					if(block[i].x+curr_block_move_delta.x == block[j].x+curr_block_move_delta.x && block[i].y+curr_block_move_delta.y+1 == block[j].y+curr_block_move_delta.y) {
 						self_intersect = true;
 					}
 				}
