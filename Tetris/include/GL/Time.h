@@ -1,25 +1,16 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include <mutex>
 
+//Wrapper class for GLFW time (time in seconds)
 class Time
 {
 private:
-    inline static std::once_flag onceFlag;
+    inline static double lastTime = 0;
 public:
     Time() = delete;
-    inline static double time;
-    inline static double lastTime;
-    inline static double deltaTime;
-    static void Init() {
-        std::call_once(onceFlag, []
-            {
-                time = 0.0;
-                lastTime = 0.0;
-                deltaTime = 0.0;
-            });
-    }
+    inline static double time = 0;
+    inline static double deltaTime = 0;
     static void Update() {
         time = glfwGetTime();
         deltaTime = time - lastTime;

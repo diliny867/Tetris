@@ -10,6 +10,7 @@
 #define FIELD_WIDTH 10
 #define FIELD_HEIGHT 22
 
+#define EMPTY_BLOCK 0
 #define I_BLOCK 1
 #define O_BLOCK 2
 #define L_BLOCK 3
@@ -18,109 +19,63 @@
 #define Z_BLOCK 6
 #define T_BLOCK 7
 #define FLOOR_BLOCK 8
+#define LEFT_WALL_INTERSECTION 9
+#define RIGHT_WALL_INTERSECTION 10
 
-// :skull_emoji:
-inline glm::ivec2 BLOCK_SPAWN_STATES[7][4] ={{{0,0},{1,0},{2,0},{3,0}},
+class Tetris {
+public:
+	// :skull_emoji:
+	inline static glm::ivec2 BLOCK_SPAWN_STATES[7][4] ={{{0,0},{1,0},{2,0},{3,0}},
 										{{0,0},{1,0},{0,1},{1,1}},
 										{{0,0},{1,0},{2,0},{0,1}},
 										{{0,0},{1,0},{2,0},{2,1}},
 										{{0,1},{1,1},{1,0},{2,0}},
 										{{0,0},{1,0},{1,1},{2,1}},
 										{{0,0},{1,0},{2,0},{1,1}}};
-inline glm::ivec2 BLOCK_ROTATE_STATES[7][4][4] ={{{{0,2},{1,2},{2,2},{3,2}},
-													{{2,0},{2,1},{2,2},{2,3}},
-													{{0,2},{1,2},{2,2},{3,2}},
-													{{2,0},{2,1},{2,2},{2,3}}},
-											{{{0,0},{1,0},{0,1},{1,1}},
-													{{0,0},{1,0},{0,1},{1,1}},
-													{{0,0},{1,0},{0,1},{1,1}},
-													{{0,0},{1,0},{0,1},{1,1}}},
-											{{{0,1},{1,1},{2,1},{0,2}},
-													{{0,0},{1,0},{1,1},{1,2}},
-													{{0,1},{1,1},{2,1},{2,0}},
-													{{1,0},{1,1},{1,2},{2,2}}},
-											{{{0,1},{1,1},{2,1},{2,2}},
-													{{0,2},{1,0},{1,1},{1,2}},
-													{{0,0},{0,1},{1,1},{2,1}},
-													{{1,0},{1,1},{1,2},{2,0}}},
-											{{{0,2},{1,2},{1,1},{2,1}},
-													{{1,0},{1,1},{2,1},{2,2}},
-													{{0,2},{1,2},{1,1},{2,1}},
-													{{1,0},{1,1},{2,1},{2,2}}},
-											{{{0,1},{1,1},{1,2},{2,2}},
-													{{2,0},{2,1},{1,1},{1,2}},
-													{{0,1},{1,1},{1,2},{2,2}},
-													{{2,0},{2,1},{1,1},{1,2}}},
-											{{{0,1},{1,1},{2,1},{1,2}},
-													{{1,0},{1,1},{1,2},{0,1}},
-													{{1,0},{1,1},{1,2},{2,1}},
-													{{1,0},{1,1},{1,2},{0,1}}}};
-//struct I_BLOCK_ROT {
-//	//inline static glm::ivec2 rot_states[4][4] ={{{0,2},{1,2},{2,2},{3,2}},
-	//												{{2,0},{2,1},{2,2},{2,3}},
-	//												{{0,2},{1,2},{2,2},{3,2}},
-	//												{{2,0},{2,1},{2,2},{2,3}}};
-//	inline static glm::ivec2 spawn_state[4] ={{0,0},{1,0},{2,0},{3,0}};
-//};
-//struct O_BLOCK_ROT {
-//	//inline static glm::ivec2 rot_states[4][4] ={{{0,0},{1,0},{0,1},{1,1}},
-	//											{{0,0},{1,0},{0,1},{1,1}},
-	//											{{0,0},{1,0},{0,1},{1,1}},
-	//											{{0,0},{1,0},{0,1},{1,1}}};
-//	inline static glm::ivec2 spawn_state[4] ={{0,0},{1,0},{0,1},{1,1}};
-//};
-//struct L_BLOCK_ROT {
-//	//inline static glm::ivec2 rot_states[4][4] ={{{0,1},{1,1},{2,1},{0,2}},
-	//											{{0,0},{1,0},{1,1},{1,2}},
-	//											{{0,1},{1,1},{2,1},{2,0}},
-	//											{{1,0},{1,1},{1,2},{2,2}}};
-//	inline static glm::ivec2 spawn_state[4] ={{0,0},{1,0},{2,0},{0,1}};
-//};
-//struct J_BLOCK_ROT {
-//	//inline static glm::ivec2 rot_states[4][4] ={{{0,1},{1,1},{2,1},{2,2}},
-	//											{{0,2},{1,0},{1,1},{1,2}},
-	//											{{0,0},{0,1},{1,1},{2,1}},
-	//											{{1,0},{1,1},{1,2},{2,0}}};
-//	inline static glm::ivec2 spawn_state[4] ={{0,0},{1,0},{2,0},{2,1}};
-//};
-//struct S_BLOCK_ROT {
-//	//inline static glm::ivec2 rot_states[4][4] ={{{0,2},{1,2},{1,1},{2,1}},
-	//											{{1,0},{1,1},{2,1},{2,2}},
-	//											{{0,2},{1,2},{1,1},{2,1}},
-	//											{{1,0},{1,1},{2,1},{2,2}}};
-//	inline static glm::ivec2 spawn_state[4] ={{0,1},{1,1},{1,0},{2,0}};
-//};
-//struct Z_BLOCK_ROT {
-//	//inline static glm::ivec2 rot_states[4][4] ={{{0,1},{1,1},{1,2},{2,2}},
-	//											{{2,0},{2,1},{1,1},{1,2}},
-	//											{{0,1},{1,1},{1,2},{2,2}},
-	//											{{2,0},{2,1},{1,1},{1,2}}};
-//	inline static glm::ivec2 spawn_state[4] ={{0,0},{1,0},{1,1},{2,1}};
-//};
-//struct T_BLOCK_ROT {
-//	//inline static glm::ivec2 rot_states[4][4] ={{{0,1},{1,1},{2,1},{1,2}},
-	//											{{1,0},{1,1},{1,2},{0,1}},
-	//											{{1,0},{1,1},{1,2},{2,1}},
-	//											{{1,0},{1,1},{1,2},{0,1}}};
-//	inline static glm::ivec2 spawn_state[4] ={{0,0},{1,0},{2,0},{1,1}};
-//};
-
-
-class Tetris {
-private:
-	int last_spawned_piece = 0;
+	inline static glm::ivec2 BLOCK_ROTATE_STATES[7][4][4] ={{{{0,2},{1,2},{2,2},{3,2}},
+														{{2,0},{2,1},{2,2},{2,3}},
+														{{0,2},{1,2},{2,2},{3,2}},
+														{{2,0},{2,1},{2,2},{2,3}}},
+												{{{0,0},{1,0},{0,1},{1,1}},
+														{{0,0},{1,0},{0,1},{1,1}},
+														{{0,0},{1,0},{0,1},{1,1}},
+														{{0,0},{1,0},{0,1},{1,1}}},
+												{{{0,1},{1,1},{2,1},{0,2}},
+														{{0,0},{1,0},{1,1},{1,2}},
+														{{0,1},{1,1},{2,1},{2,0}},
+														{{1,0},{1,1},{1,2},{2,2}}},
+												{{{0,1},{1,1},{2,1},{2,2}},
+														{{0,2},{1,0},{1,1},{1,2}},
+														{{0,0},{0,1},{1,1},{2,1}},
+														{{1,0},{1,1},{1,2},{2,0}}},
+												{{{0,2},{1,2},{1,1},{2,1}},
+														{{1,0},{1,1},{2,1},{2,2}},
+														{{0,2},{1,2},{1,1},{2,1}},
+														{{1,0},{1,1},{2,1},{2,2}}},
+												{{{0,1},{1,1},{1,2},{2,2}},
+														{{2,0},{2,1},{1,1},{1,2}},
+														{{0,1},{1,1},{1,2},{2,2}},
+														{{2,0},{2,1},{1,1},{1,2}}},
+												{{{0,1},{1,1},{2,1},{1,2}},
+														{{1,0},{1,1},{1,2},{0,1}},
+														{{1,0},{1,1},{1,2},{2,1}},
+														{{1,0},{1,1},{1,2},{0,1}}}};
+	int last_spawned_piece = EMPTY_BLOCK;
 	int rot_state = 0;
 	glm::ivec2 curr_block_move_delta = {0,0};
 	int field[FIELD_WIDTH][FIELD_HEIGHT+1];
 	glm::ivec2* curr_block_pos; //0 0 is top left
-	std::time_t tick_timeout = 100;
+	double tick_timeout = 0.1f; //in seconds
+	double lastTickTime = 0;
 	void spawnPiece() {
-		curr_block_move_delta ={0,0};
-		int piece = 0;
+		curr_block_move_delta ={3,0};
+		int piece = EMPTY_BLOCK;
+		last_spawned_piece = EMPTY_BLOCK;
 		while(last_spawned_piece == piece) {
 			piece = 1+rand()%7;
 		}
-		curr_block_pos = BLOCK_SPAWN_STATES[piece];
+		curr_block_pos = BLOCK_SPAWN_STATES[piece-1];
+
 		//switch(piece) {
 		//case I_BLOCK:
 		//	curr_block_pos = I_BLOCK_ROT::spawn_state;
@@ -173,9 +128,8 @@ private:
 		//	break;
 		//}
 		for(int i=0;i<4;i++) {
-			field[curr_block_pos[i].x][curr_block_pos[i].y] = piece;
+			field[curr_block_pos[i].x+curr_block_move_delta.x][curr_block_pos[i].y+curr_block_move_delta.y] = piece;
 		}
-
 		last_spawned_piece = piece;
 	}
 	int lowestCurrentBlock() const {
@@ -204,48 +158,101 @@ private:
 		memcpy(field+(FIELD_WIDTH*row),field+(FIELD_WIDTH*row-1),FIELD_WIDTH*row);
 		memset(field,0,FIELD_WIDTH*row);
 	}
-	void rotateBlock(const bool left) {
+	int checkBlockIntersects(const glm::ivec2* block) const {
+		int intersection = EMPTY_BLOCK;
 		for(int i=0;i<4;i++) {
-			field[curr_block_pos[i].x][curr_block_pos[i].y] = 0;
+			if(block[i].y+curr_block_move_delta.y>=FIELD_WIDTH) {
+				return FLOOR_BLOCK;
+			}
 		}
+		for(int i=0;i<4;i++) {
+			int posx = block[i].x+curr_block_move_delta.x;
+			int posy = block[i].y+curr_block_move_delta.y;
+			if(posx<0) {
+				return LEFT_WALL_INTERSECTION;
+			}
+			if(posx>=FIELD_WIDTH) {
+				return RIGHT_WALL_INTERSECTION;
+			}
+			if(field[posy][posy]!=EMPTY_BLOCK) {
+				if(intersection!=last_spawned_piece){
+					intersection = field[posx][posy];
+				}
+			}
+		}
+		return intersection;
+	}
+	bool checkBlockBottomIntersection(const glm::ivec2* block) const {
+		for(int i=0;i<4;i++) {
+			if(field[block[i].x+curr_block_move_delta.x][block[i].y+curr_block_move_delta.y+1]!=EMPTY_BLOCK) {
+				bool self_intersect = false;
+				for(int j=0;j<4;j++) {
+					if(field[block[i].x+curr_block_move_delta.x][block[i].y+curr_block_move_delta.y+1] == field[block[j].x+curr_block_move_delta.x][block[j].y+curr_block_move_delta.y]) {
+						self_intersect = true;
+					}
+				}
+				if(!self_intersect){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	void rotateBlock(const bool left) { //TODO: TOP WALL COLLISION
 		glm::ivec2 last_block_pos[4];
 		memcpy(last_block_pos,curr_block_pos,4);
+		int last_rot_state = rot_state;
 		if(left) {
 			rot_state--;
 			if(rot_state<0){ rot_state+=4; }
-			curr_block_pos = BLOCK_ROTATE_STATES[last_spawned_piece][rot_state];
-			//check intersection, if are - revert
 		}else {
 			rot_state++;
 			if(rot_state>=4){ rot_state-=4; }
+		}
+
+		glm::ivec2* new_block_poses = BLOCK_ROTATE_STATES[last_spawned_piece][rot_state];
+		glm::ivec2 last_block_move_delta = curr_block_move_delta;
+
+		while(true){
+			int intersection = checkBlockIntersects(new_block_poses);
+			switch(intersection) {
+			case EMPTY_BLOCK: //no intersection
+				memcpy(curr_block_pos,new_block_poses,4);
+				for(int i=0;i<4;i++) {
+					field[last_block_pos[i].x][last_block_pos[i].y] = EMPTY_BLOCK;
+				}
+				for(int i=0;i<4;i++) {
+					field[curr_block_pos[i].x][curr_block_pos[i].y] = last_spawned_piece;
+				}
+				return;
+			case LEFT_WALL_INTERSECTION:
+				curr_block_move_delta.x++;
+				break;
+			case RIGHT_WALL_INTERSECTION:
+				curr_block_move_delta.x--;
+				break;
+			default: //intersection with floor or with blocks, don't rotate
+				curr_block_move_delta = last_block_move_delta;
+				rot_state = last_rot_state;
+				return;
+			}
 		}
 	}
 	void speedUpBlock() {
 
 	}
-	void speedUpGame() {
+	void speedUpBlockSpawn() {
 
 	}
-public:
-	Tetris() {
-		memset(field,0,FIELD_WIDTH*FIELD_HEIGHT);
-		for(int i=0;i<FIELD_WIDTH;i++) {
-			field[i][FIELD_HEIGHT]=FLOOR_BLOCK;
-		}
-	}
-	void Tick() {
-		if(field[curr_block_pos[0].x][curr_block_pos[0].y+1]>0 ||
-			field[curr_block_pos[1].x][curr_block_pos[1].y+1]>0 ||
-			field[curr_block_pos[2].x][curr_block_pos[2].y+1]>0 ||
-			field[curr_block_pos[3].x][curr_block_pos[3].y+1]>0) 
-		{ //solid under block
+	void tick() {
+		if(checkBlockBottomIntersection(curr_block_pos)) {
 			int lowest = lowestCurrentBlock();
 			int highest = highestCurrentBlock();
 
 			for(int i=highest;i<highest-lowest;i++) {
 				bool row_complete = true;
 				for(int j=0;j<FIELD_WIDTH;j++) {
-					if(field[i][j] == 0) {
+					if(field[i][j] == EMPTY_BLOCK) {
 						row_complete = false;
 						break;
 					}
@@ -254,13 +261,30 @@ public:
 					removeRow(i);
 				}
 			}
-		}else {
+			spawnPiece();
+		}else{
 			for(int i=0;i<4;i++) {
-				field[curr_block_pos[i].x][curr_block_pos[i].y] = 0;
-				curr_block_move_delta.y++;
-				//curr_block_pos[i].y++;
+				field[curr_block_pos[i].x+curr_block_move_delta.x][curr_block_pos[i].y+curr_block_move_delta.y] = EMPTY_BLOCK;
+			}
+			curr_block_move_delta.y++;
+			for(int i=0;i<4;i++) {
 				field[curr_block_pos[i].x+curr_block_move_delta.x][curr_block_pos[i].y+curr_block_move_delta.y] = last_spawned_piece;
 			}
+		}
+	}
+public:
+	Tetris() {
+		memset(field,EMPTY_BLOCK,FIELD_WIDTH*FIELD_HEIGHT);
+		for(int i=0;i<FIELD_WIDTH;i++) {
+			field[i][FIELD_HEIGHT]=FLOOR_BLOCK;
+		}
+		srand(time(0));
+		spawnPiece();
+	}
+	void Update() {
+		if(Time::time-lastTickTime>=tick_timeout){
+			tick();
+			lastTickTime = Time::time;
 		}
 	}
 };

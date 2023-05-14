@@ -78,8 +78,6 @@ int main() {
 	//glEnable(GL_LINE_SMOOTH);
     //glHint(GL_LINE_SMOOTH_HINT,GL_NICEST);
 
-    Time::Init();
-
     Shader shader("resources/shaders/shader_vs.glsl","resources/shaders/shader_fs.glsl");
 
     //GLuint vbo;
@@ -100,12 +98,28 @@ int main() {
 	    projection = glm::ortho(0.0f,SCR_WIDTH,SCR_HEIGHT,0.0f);
     };
 
+    Tetris tetrisGame;
+
     while (!glfwWindowShouldClose(window)) {
         Time::Update();
         processInput(window);// input
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        tetrisGame.Update();
+
+        for(int i=0;i<FIELD_HEIGHT+1;i++) {
+	        for(int j=0;j<FIELD_WIDTH;j++) {
+                if(tetrisGame.field[j][i]==EMPTY_BLOCK) {
+                    std::cout<<' ';
+                }else {
+                    std::cout<<'#';
+                }
+	        }
+            std::cout<<std::endl;
+        }
+        std::system("cls");
 
         shader.use();
         shader.setMat4("projection",projection);
