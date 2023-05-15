@@ -67,6 +67,9 @@ private:
 	glm::ivec2* curr_block_pos = new glm::ivec2[4]; //0 0 is top left
 	double tick_timeout = 0.2f; //in seconds
 	double last_tick_time = 0;
+	double last_speedup_time = 0;
+	double game_speedup_interval = 14; //secodnds
+	double tick_timeout_mult = 1.0;
 	bool game_over = false;
 	void clearCurrBlock() {
 		for(int i=0;i<4;i++) {
@@ -167,11 +170,8 @@ private:
 		}
 		return false;
 	}
-	void speedUpBlock() {
-
-	}
 	void speedUpBlockSpawn() {
-
+		tick_timeout*=0.93;
 	}
 	void tick() {
 		if(checkBlockBottomIntersection(curr_block_pos)) {
@@ -259,13 +259,24 @@ public:
 			}
 		}
 	}
+	void SpeedUpBlock(const bool speed_up) {
+		if(speed_up) {
+			tick_timeout_mult = 0.3;
+		} else {
+			tick_timeout_mult = 1.0;
+		}
+	}
 	void Update() {
 		if(game_over) {
 			return;
 		}
-		if(Time::time-last_tick_time>=tick_timeout){
+		if(Time::time-last_tick_time>=tick_timeout*tick_timeout_mult){
 			tick();
 			last_tick_time = Time::time;
+		}
+		if(Time::time-last_speedup_time>game_speedup_interval) {
+			speedUpBlockSpawn();
+			last_speedup_time = Time::time;
 		}
 	}
 	int GetBlock(const int x,const int y) const {

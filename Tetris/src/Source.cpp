@@ -110,7 +110,7 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         Time::Update();
-        //processInput(window);
+        processInput(window);
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -136,9 +136,33 @@ void printFPS() {
     std::cout << 1/Time::deltaTime << std::endl;
 }
 
+double last_move_time = 0;
+double time_since_pressed = 0;
+bool move_left = false;
+double calc_move_delay(const double x) {
+    return ((1.0/(x)+1))/30.0;
+}
 void processInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if(glfwGetKey(window,GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window,GLFW_KEY_DOWN) == GLFW_PRESS){
+        tr.tetris.SpeedUpBlock(true);
+    }
+
+    if(move_left){
+        if(Time::time - last_move_time>calc_move_delay(time_since_pressed)){
+            if(glfwGetKey(window,GLFW_KEY_LEFT) == GLFW_PRESS  || glfwGetKey(window,GLFW_KEY_A) == GLFW_PRESS) {
+                tr.tetris.MoveCurrBlock(true);
+                last_move_time = Time::time;
+            }
+        }
+    }else {
+        if(Time::time - last_move_time>calc_move_delay(time_since_pressed)){
+            if(glfwGetKey(window,GLFW_KEY_RIGHT) == GLFW_PRESS  || glfwGetKey(window,GLFW_KEY_D) == GLFW_PRESS) {
+                tr.tetris.MoveCurrBlock(false);
+                last_move_time = Time::time;
+            }
+        }
+    }
+    time_since_pressed += Time::deltaTime;
 }
 
 void key_callback(GLFWwindow* window,int key,int scancode,int action,int mods) {
@@ -146,16 +170,25 @@ void key_callback(GLFWwindow* window,int key,int scancode,int action,int mods) {
         glfwSetWindowShouldClose(window,true);
     }
     if((key == GLFW_KEY_LEFT || key == GLFW_KEY_A) && action == GLFW_PRESS) {
-        tr.tetris.MoveCurrBlock(true);
+        move_left = true;
+        last_move_time = 0;
+        time_since_pressed = 0;
+        //tr.tetris.MoveCurrBlock(true);
     }
     if((key == GLFW_KEY_RIGHT || key == GLFW_KEY_D) && action == GLFW_PRESS) {
-        tr.tetris.MoveCurrBlock(false);
+        move_left = false;
+        last_move_time = 0;
+        time_since_pressed = 0;
+        //tr.tetris.MoveCurrBlock(false);
     }
     if(key == GLFW_KEY_Q && action == GLFW_PRESS) {
         tr.tetris.RotateCurrBlock(true);
     }
     if(key == GLFW_KEY_E && action == GLFW_PRESS) {
         tr.tetris.RotateCurrBlock(false);
+    }
+    if((key == GLFW_KEY_S || key == GLFW_KEY_DOWN) && action == GLFW_RELEASE){
+        tr.tetris.SpeedUpBlock(false);
     }
 }
 
