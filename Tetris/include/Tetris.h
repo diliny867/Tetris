@@ -65,11 +65,13 @@ private:
 	glm::ivec2 curr_block_move_delta = {0,0};
 	int field[FIELD_WIDTH][FIELD_HEIGHT+1];
 	glm::ivec2* curr_block_pos = new glm::ivec2[4]; //0 0 is top left
-	double tick_timeout = 0.2f; //in seconds
+	double tick_timeout = 0.6f; //in seconds
 	double last_tick_time = 0;
 	double last_speedup_time = 0;
-	double game_speedup_interval = 14; //secodnds
+	double game_speedup_interval = 25; //secodnds
 	double tick_timeout_mult = 1.0;
+	unsigned long long score = 0;
+	int score_increase = 1;
 	bool game_over = false;
 	void clearCurrBlock() {
 		for(int i=0;i<4;i++) {
@@ -172,6 +174,7 @@ private:
 	}
 	void speedUpBlockSpawn() {
 		tick_timeout*=0.93;
+		score_increase++;
 	}
 	void tick() {
 		if(checkBlockBottomIntersection(curr_block_pos)) {
@@ -191,7 +194,10 @@ private:
 					removed_rows_count++;
 				}
 			}
-
+			if(removed_rows_count>0) {
+				score+=100*removed_rows_count*score_increase;
+				std::cout<<"Score: "<<score<<std::endl;
+			}
 			spawnPiece();
 		}else{
 			clearCurrBlock();
@@ -206,6 +212,10 @@ public:
 			field[i][FIELD_HEIGHT]=FLOOR_BLOCK;
 		}
 		srand(time(0));
+		std::cout<<"A/LEFT and D/RIGHT to move piece\n";
+		std::cout<<"S to speed up piece\n";
+		std::cout<<"Q and E to rotate piece\n";
+		std::cout<<"Score: "<<score<<std::endl;
 		spawnPiece();
 	}
 	void MoveCurrBlock(const bool left) {
@@ -261,7 +271,7 @@ public:
 	}
 	void SpeedUpBlock(const bool speed_up) {
 		if(speed_up) {
-			tick_timeout_mult = 0.3;
+			tick_timeout_mult = 0.2;
 		} else {
 			tick_timeout_mult = 1.0;
 		}
