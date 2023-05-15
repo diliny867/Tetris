@@ -95,6 +95,8 @@ private:
 
 		if(checkBlockIntersects(curr_block_pos)!=EMPTY_BLOCK) {
 			game_over = true;
+			std::cout<<"Game Over\n";
+			std::cout<<"Your total score: "<<score<<std::endl;
 		}
 
 		fillCurrBlock();
